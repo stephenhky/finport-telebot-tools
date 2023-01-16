@@ -26,7 +26,9 @@ def lambda_handler(events, context):
     s3_client = boto3.client('s3', 'us-east-1', config=botocore.config.Config(s3={'addressing_style': 'path'}))
     userfilename = 'tele-{}.json'.format(user_info['id'])
     # check if the file is there
-    objectlist = s3_client.list_objects(Bucket=s3_bucket, Prefix=userfilename)
+    objects_retrieved = s3_client.list_objects(Bucket=s3_bucket, Prefix=userfilename)
+    objectlist = objects_retrieved['Contents']
+    objectlist = [object['Key'] for object in objectlist]
     if userfilename in objectlist:
         s3_client.download_file(
             s3_bucket,
