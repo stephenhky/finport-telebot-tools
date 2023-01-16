@@ -44,7 +44,7 @@ def send_telegram_text_notification(chatid, text):
 
 def lambda_handler(events, context):
     # get query
-    query = json.loads(events['body'])
+    query = json.loads(events)['body']
     logging.info(query)
     print(query)
 
