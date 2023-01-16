@@ -20,7 +20,7 @@ def lambda_handler(event, context):
     # getting query
     logging.info(event)
     logging.info(context)
-    query = json.loads(event)['body']
+    query = event['body']
 
     # load data
     chatid = query['chatid']
