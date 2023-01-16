@@ -27,8 +27,11 @@ def lambda_handler(events, context):
     userfilename = 'tele-{}.json'.format(user_info['id'])
     # check if the file is there
     objects_retrieved = s3_client.list_objects(Bucket=s3_bucket, Prefix=userfilename)
-    objectlist = objects_retrieved['Contents']
-    objectlist = [object['Key'] for object in objectlist]
+    if 'Contents' in objects_retrieved:
+        objectlist = objects_retrieved['Contents']
+        objectlist = [object['Key'] for object in objectlist]
+    else:
+        objectlist = []
     if userfilename in objectlist:
         s3_client.download_file(
             s3_bucket,
@@ -42,6 +45,8 @@ def lambda_handler(events, context):
                 changed = True
                 break
         if changed:
+            logging.info('Changed record')
+            print('Changed record')
             user_info['watchlists'] = existing_info['watchlists']
             json.dump(user_info, open(os.path.join('/', 'tmp', userfilename), 'w'))
             s3_client.upload_file(
@@ -49,7 +54,12 @@ def lambda_handler(events, context):
                 s3_bucket,
                 userfilename
             )
+        else:
+            logging.info('No action taken.')
+            print('No action taken.')
     else:
+        logging.info('Created record')
+        print('Created record')
         user_info['watchlists'] = {}
         json.dump(user_info, open(os.path.join('/', 'tmp', userfilename), 'w'))
         s3_client.upload_file(
