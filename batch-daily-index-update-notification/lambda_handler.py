@@ -68,7 +68,7 @@ def lambda_handler(events, context):
     for index_info in report_dict:
         values = index_info['recent_values']
         if len(values) > 0:
-            this_index_str = '{} ({})\n'.format(index_info['name'], index_info['index'])
+            this_index_str = '\n{} ({})\n'.format(index_info['name'], index_info['index'])
             this_index_str += '  {:.2f} ({} by {:.2f}% from {} ({:.2f})\n'.format(
                 values['today']['close'],
                 'increase' if values['today']['close'] >= values['previousday']['close'] else 'decrease',
