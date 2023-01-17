@@ -1,6 +1,7 @@
 
 from datetime import date, datetime, timedelta
 import json
+import logging
 
 from finsim.data import get_yahoofinance_data
 
@@ -34,6 +35,8 @@ def get_recent_indices(index, numdays=30, mockedtoday=None):
 def lambda_handler(event, context):
     # mock today
     query = json.loads(event['body'])
+    logging.info(query)
+    print(query)
     if 'mockedtoday' in query:
         mockedtoday = query['mockedtoday']
     else:
@@ -46,6 +49,8 @@ def lambda_handler(event, context):
             'name': idxname,
             'recent_values': get_recent_indices(idxsymbol, mockedtoday=mockedtoday)
         })
+    logging.info(report_info)
+    print(report_info)
 
     return {
         'statusCode': 200,
