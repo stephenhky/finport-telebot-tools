@@ -64,7 +64,7 @@ def lambda_handler(events, context):
     report_dict = json.loads(response.text)
 
     # generate reports
-    report_str = '{} {}\n'.format(datetime.strftime(date.today(), '%Y-%m-%d'), '(TEST)' if test else '')
+    report_str = '{} {}\n'.format(mockedtoday, '(TEST)' if test else '')
     for index_info in report_dict:
         values = index_info['recent_values']
         if len(values) > 0:
