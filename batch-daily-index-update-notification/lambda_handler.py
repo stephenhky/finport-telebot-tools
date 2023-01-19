@@ -64,10 +64,15 @@ def lambda_handler(events, context):
     report_dict = json.loads(response.text)
 
     # generate reports
-    report_str = '{} {}\n'.format(mockedtoday, '(TEST)' if test else '')
+    report_str = '{} {}\n'.format(
+        datetime.strftime(date.today(), '%Y-%m-%d') if mockedtoday is None else mockedtoday,
+        '(TEST)' if test else ''
+    )
+    count = 0
     for index_info in report_dict:
         values = index_info['recent_values']
         if len(values) > 0:
+            count += 1
             this_index_str = '\n{} ({})\n'.format(index_info['name'], index_info['index'])
             this_index_str += '  {:.2f} ({} by {:.2f}% from {} ({:.2f})\n'.format(
                 values['today']['close'],
@@ -77,23 +82,26 @@ def lambda_handler(events, context):
                 values['previousday']['close']
             )
             report_str += this_index_str
+    if count == 0:
+        report_str = ''
     logging.info(report_str)
     print(report_str)
 
     # send out notification
-    s3_client = boto3.client('s3', 'us-east-1', config=botocore.config.Config(s3={'addressing_style': 'path'}))
-    objects_retrieved = s3_client.list_objects(Bucket=s3_bucket)
-    objectlist = objects_retrieved['Contents']
-    objectlist = [object['Key'] for object in objectlist]
-    logging.info(objectlist)
-    print(objectlist)
-    for userjsonname in objectlist:
-        logging.info(userjsonname)
-        print(userjsonname)
-        matcher = re.match('tele-(\\d+)\.json', userjsonname)
-        if matcher is not None:
-            chatid = int(matcher.group(1))
-            send_telegram_text_notification(chatid, report_str)
+    if count > 0:
+        s3_client = boto3.client('s3', 'us-east-1', config=botocore.config.Config(s3={'addressing_style': 'path'}))
+        objects_retrieved = s3_client.list_objects(Bucket=s3_bucket)
+        objectlist = objects_retrieved['Contents']
+        objectlist = [object['Key'] for object in objectlist]
+        logging.info(objectlist)
+        print(objectlist)
+        for userjsonname in objectlist:
+            logging.info(userjsonname)
+            print(userjsonname)
+            matcher = re.match('tele-(\\d+)\.json', userjsonname)
+            if matcher is not None:
+                chatid = int(matcher.group(1))
+                send_telegram_text_notification(chatid, report_str)
 
     # return codes
     return {
