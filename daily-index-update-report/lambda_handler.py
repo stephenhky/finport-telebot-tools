@@ -7,11 +7,11 @@ from finsim.data import get_yahoofinance_data
 
 
 indices = {
-    '^DJI': 'Dow-Jones Industrial Average',
     '^GSPC': 'S&P 500',
     '^IXIC': 'NASDAQ Composite',
-    '^VIX': 'CBOE Voltaility Index',
-    '^RUT': 'Russell 2000'
+    '^DJI': 'Dow-Jones Industrial Average',
+    '^RUT': 'Russell 2000',
+    '^VIX': 'CBOE Voltaility Index'
 }
 
 
