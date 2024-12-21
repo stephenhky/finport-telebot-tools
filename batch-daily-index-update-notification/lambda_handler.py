@@ -13,6 +13,16 @@ import requests
 
 load_dotenv()
 
+
+default_indices = {
+    '^GSPC': 'S&P 500',
+    '^IXIC': 'NASDAQ Composite',
+    '^DJI': 'Dow-Jones Industrial Average',
+    '^RUT': 'Russell 2000',
+    '^VIX': 'CBOE Voltaility Index'
+}
+
+
 # get daily report computation API
 DAILYREPORT_API_URL = os.environ.get('DAILYREPORTAPI')
 
@@ -51,6 +61,8 @@ def lambda_handler(events, context):
     # get mockedtoday
     mockedtoday = query.get('mockedtoday')
     test = query.get('test', False)
+    indices = query.get('indices_to_show', default_indices)
+    print(indices)
 
     # get daily computation reports
     response = requests.request(
@@ -59,7 +71,7 @@ def lambda_handler(events, context):
         headers={
             'Content-Type': 'application/json'
         },
-        data=json.dumps({'mockedtoday': mockedtoday})
+        data=json.dumps({'mockedtoday': mockedtoday, 'indices_to_show': indices})
     )
     report_dict = json.loads(response.text)
 
