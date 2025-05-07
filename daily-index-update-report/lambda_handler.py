@@ -1,8 +1,11 @@
 
+import traceback
 from datetime import date, datetime, timedelta
 import json
 import logging
+import warnings
 
+from yfinance.exceptions import YFRateLimitError
 from finsim.data import get_yahoofinance_data
 
 
@@ -18,10 +21,17 @@ default_indices = {
 def get_recent_indices(index, numdays=30, mockedtoday=None):
     todaystr = datetime.strftime(date.today(), '%Y-%m-%d') if mockedtoday is None else mockedtoday
     begindate = datetime.strftime(date.today()-timedelta(days=numdays), '%Y-%m-%d') if mockedtoday is None else datetime.strftime(datetime.strptime(todaystr, '%Y-%m-%d')-timedelta(days=numdays), '%Y-%m-%d')
-    df = get_yahoofinance_data(index, begindate, todaystr)
+    try:
+        df = get_yahoofinance_data(index, begindate, todaystr)
+    except YFRateLimitError:
+        warnings.warn("Limit requests exceeded!")
+        traceback.print_exc()
+        return {}
     try:
         todayclosing = df[df['Date'] == todaystr]['Close'].to_numpy()[0]
     except KeyError:
+        return {}
+    except IndexError:
         return {}
 
     previousdaystr = datetime.strftime(df.iloc[-2, :].TimeStamp, '%Y-%m-%d')
